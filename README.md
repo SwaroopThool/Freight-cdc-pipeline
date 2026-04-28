@@ -198,3 +198,31 @@ docker compose down
 # Full reset — wipes all data
 docker compose down -v
 ```
+
+---
+
+## Project Structure
+
+```
+freight-cdc/
+├── docker-compose.yml          # All services
+├── .env                        # DB credentials
+├── postgres/
+│   └── init.sql                # Schema, indexes, publication, seed data
+├── debezium/
+│   ├── freight-connector.json  # Debezium PostgreSQL connector config
+│   └── register-connector.sh  # Auto-registers connector on startup
+├── materialize/
+│   └── setup.sql               # Kafka sources, materialized views, sinks
+├── generator/
+│   └── generate.py             # Continuous data generator (psycopg2)
+├── consumer/
+│   └── consumer.py             # Kafka consumer for Materialize sink topics
+├── api/
+│   ├── main.py                 # FastAPI application
+│   ├── database.py             # PostgreSQL connection
+│   ├── schemas.py              # Pydantic request/response models
+│   └── routers/                # One router per entity (8 total)
+├── dashboard/
+    └── app.py                  # Streamlit real-time dashboard
+```
