@@ -14,13 +14,13 @@ A full Change Data Capture (CDC) pipeline for a logistics company handling freig
          ▼
 ┌─────────────────┐    WAL / pgoutput
 │   PostgreSQL    │──────────────────────► Debezium Kafka Connect
-│  (source DB)   │                                │
+│  (source DB)    │                                │
 └─────────────────┘                    JSON CDC events
                                                    │
                                                    ▼
                                           ┌─────────────────┐
-                                          │    Redpanda      │  Kafka-compatible broker
-                                          │  (8 CDC topics)  │  freight_db.public.*
+                                          │    Redpanda     │  Kafka-compatible broker
+                                          │  (8 CDC topics) │  freight_db.public.*
                                           └────────┬────────┘
                                                    │
                                                    ▼
@@ -50,7 +50,7 @@ A full Change Data Capture (CDC) pipeline for a logistics company handling freig
 | REST API | FastAPI + psycopg2 |
 | Dashboard | Streamlit + Plotly |
 | Orchestration | Docker Compose |
-| Cloud IaC | Terraform (AWS EC2) |
+| Cloud IaC | Terraform (AWS EC2) (TODO)|
 
 ---
 
