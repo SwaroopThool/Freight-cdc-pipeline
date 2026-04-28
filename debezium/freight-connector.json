@@ -1,0 +1,25 @@
+{
+  "name": "freight-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "freight_user",
+    "database.password": "freight_pass",
+    "database.dbname": "freight_db",
+    "topic.prefix": "freight_db",
+    "plugin.name": "pgoutput",
+    "publication.name": "freight_pub",
+    "slot.name": "freight_debezium_slot",
+    "table.include.list": "public.location,public.vehicle,public.freight,public.purchase_order,public.shipment,public.job,public.invoice,public.tracking_event",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "true",
+    "value.converter.schemas.enable": "true",
+    "snapshot.mode": "initial",
+    "decimal.handling.mode": "double",
+    "time.precision.mode": "connect",
+    "tombstones.on.delete": "false",
+    "tasks.max": "1"
+  }
+}
