@@ -87,26 +87,27 @@ cd freight-cdc
 docker compose up --build
 ```
 
-Steps 3 and 4 are **fully automated** by two one-shot Docker Compose services:
-
-- `debezium-setup` — waits for Debezium to be healthy, then runs `register-connector.sh` to register the Postgres connector.
-- `materialize-setup` — waits for Materialize and Debezium to be healthy, then runs `setup.sql` to create sources, views, and sinks.
-
-If the pipeline isn't flowing, check whether either one-shot container exited with an error:
+**Step 3 — Register the Debezium connector** (automated via `debezium-setup`, but rerun manually if needed):
 
 ```bash
-docker ps -a --filter name=debezium-setup --filter name=materialize-setup
-```
-
-If either shows a non-zero exit code, rerun it:
-
-```bash
-# Rerun Debezium connector registration
 docker compose run --rm debezium-setup
-
-# Rerun Materialize setup
-docker compose run --rm materialize-setup
 ```
+
+**Step 4 — Run Materialize setup (required)**
+
+This step is **not reliably automated** — `materialize-setup` runs before CDC topics exist in Redpanda, so it often fails silently. After CDC topics appear (check Redpanda Console at `http://localhost:8080`), run it manually:
+
+```bash
+docker run --rm \
+  -v $(pwd)/materialize:/materialize \
+  --network freight-cdc_freight-net \
+  postgres:16 \
+  psql -h materialized -p 6875 -U materialize -d materialize -f /materialize/setup.sql
+```
+
+Without this step the Shipments, Revenue, Jobs, and Invoices dashboard tabs will show no data (they read from Materialize views).
+
+> **Note:** The network name `freight-cdc_freight-net` is derived from the directory name. If you set `COMPOSE_PROJECT_NAME=freight` in `.env`, use `freight_freight-net` instead.
 
 ---
 
