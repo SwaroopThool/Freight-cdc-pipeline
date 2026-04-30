@@ -15,25 +15,25 @@ A full Change Data Capture (CDC) pipeline for a logistics company handling freig
 ┌─────────────────┐    WAL / pgoutput
 │   PostgreSQL    │──────────────────────► Debezium Kafka Connect
 │  (source DB)    │                                │
-└─────────────────┘                    JSON CDC events
-                                                   │
-                                                   ▼
-                                          ┌─────────────────┐
-                                          │    Redpanda     │  Kafka-compatible broker
-                                          │  (8 CDC topics) │  freight_db.public.*
-                                          └────────┬────────┘
-                                                   │
-                                                   ▼
+└────────┬────────┘                    JSON CDC events
+         │                                         │
+         │ reads/writes                            ▼
+         │                                ┌─────────────────┐
+         ▼                                │    Redpanda     │  Kafka-compatible broker
+  ┌─────────────┐                         │  (8 CDC topics) │  freight_db.public.*
+  │  FastAPI    │                         └────────┬────────┘
+  │  CRUD API   │                                  │
+  └─────────────┘                                  ▼
                                           ┌─────────────────┐
                                           │  Materialize    │  streaming SQL engine
                                           │  (views+sinks)  │
                                           └────────┬────────┘
-                                    ┌──────────────┼──────────────┐
-                                    ▼              ▼              ▼
-                             Redpanda sink    FastAPI       Streamlit
-                             topics (mz.*)   CRUD API      Dashboard
-                                    │
+                                    ┌──────────────┘
                                     ▼
+                             Redpanda sink       ┌─────────────────┐
+                             topics (mz.*)  ◄────│   Streamlit     │────► PostgreSQL
+                                    │            │   Dashboard     │      (live map,
+                                    ▼            └─────────────────┘       locations)
                              Kafka Consumer
 ```
 
