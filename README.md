@@ -85,23 +85,28 @@ cd freight-cdc
 
 # 2. Start all services (~5 min on first run — pulls images + builds)
 docker compose up --build
-
-# 3. Register the Debezium connector (after Debezium is healthy)
-curl -i -X POST \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  http://localhost:8083/connectors \
-  -d @debezium/freight-connector.json
-
-# 4. Run the Materialize setup (after CDC topics appear in Redpanda)
-docker run --rm \
-  -v $(pwd)/materialize:/materialize \
-  --network freight-cdc_freight-net \
-  postgres:16 \
-  psql -h materialized -p 6875 -U materialize -d materialize -f /materialize/setup.sql
 ```
 
-> Steps 3 and 4 are needed only on first start or after `docker compose down -v`.
+Steps 3 and 4 are **fully automated** by two one-shot Docker Compose services:
+
+- `debezium-setup` — waits for Debezium to be healthy, then runs `register-connector.sh` to register the Postgres connector.
+- `materialize-setup` — waits for Materialize and Debezium to be healthy, then runs `setup.sql` to create sources, views, and sinks.
+
+If the pipeline isn't flowing, check whether either one-shot container exited with an error:
+
+```bash
+docker ps -a --filter name=debezium-setup --filter name=materialize-setup
+```
+
+If either shows a non-zero exit code, rerun it:
+
+```bash
+# Rerun Debezium connector registration
+docker compose run --rm debezium-setup
+
+# Rerun Materialize setup
+docker compose run --rm materialize-setup
+```
 
 ---
 
